@@ -103,6 +103,7 @@ pub async fn validate(bot_data: &Ready) {
                 if doc_contains_key(&doc, "welcome_message").await == false { set_default(&guild_id, "welcome_message", "Welcome to the guild!").await; };
                 if doc_contains_key(&doc, "new_member_role").await == false { set_default(&guild_id, "new_member_role", "").await; };
                 if doc_contains_key(&doc, "prefix").await == false { set_default(&guild_id, "prefix", "tg!").await; };
+                if doc_contains_key(&doc, "staff_id").await == false { set_default(&guild_id, "staff_id", "").await; };
             }, None => {
                 //create document
                 println!("Create");
@@ -114,6 +115,7 @@ pub async fn validate(bot_data: &Ready) {
                 set_default(&guild_id, "welcome_message", "Welcome to the guild!").await;
                 set_default(&guild_id, "new_member_role", "").await;
                 set_default(&guild_id, "prefix", "tg!").await;
+                set_default(&guild_id, "staff_id", "").await;
             }
         }
     }

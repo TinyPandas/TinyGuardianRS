@@ -10,8 +10,11 @@ use serenity::{
     }
 };
 
+use crate::lib::util::*;
+
 #[command]
 #[min_args(1)]
+#[checks(Staff)]
 async fn clear(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let delete_count = args.single::<u64>().unwrap();
     let id = if let Ok(id) = args.single::<u64>() { Some(id) } else { None };
@@ -25,6 +28,7 @@ async fn clear(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                 retriever.before(msg.id).limit(delete_count)
             }
         };
+
         r
     }).await?;
 

@@ -68,8 +68,13 @@ impl EventHandler for Handler {
 #[group]
 #[owners_only]
 #[only_in(guilds)]
-#[commands(set, enable, holdlast, clear)]
+#[commands(set, enable, holdlast)]
 struct Owner;
+
+#[group]
+#[only_in(guilds)]
+#[commands(clear)]
+struct Staff;
 
 #[group]
 #[commands(ping, verify, support)]
@@ -160,6 +165,7 @@ async fn main() {
         .normal_message(normal_message)
         .help(&MY_HELP)
         .group(&OWNER_GROUP)
+        .group(&STAFF_GROUP)
         .group(&GENERAL_GROUP);
 
     let mut client = Client::new(&token)
