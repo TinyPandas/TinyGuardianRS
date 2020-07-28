@@ -21,7 +21,7 @@ jobs:
     - name: Upload build files
       uses: actions/upload-artifact@v2
       with:
-        name: target
-        path: target
+        name: tinyguardian
+        path: target/debug/tinyguardian
     - name: Run tests
       run: cargo test --verbose
