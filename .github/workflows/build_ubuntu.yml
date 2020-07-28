@@ -1,4 +1,4 @@
-name: Rust
+name: latest-build
 
 on:
   push:
@@ -17,11 +17,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build
-      run: cargo build --verbose
+      run: cargo build --release
     - name: Upload build files
       uses: actions/upload-artifact@v2
       with:
         name: tinyguardian
-        path: target/debug/tinyguardian
-    - name: Run tests
-      run: cargo test --verbose
+        path: target/release/tinyguardian
