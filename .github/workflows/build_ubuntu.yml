@@ -21,6 +21,7 @@ jobs:
     - name: Upload build files
       uses: actions/upload-artifact@v2
       with:
-        path: debug-target
+        name: build
+        path: build
     - name: Run tests
       run: cargo test --verbose
