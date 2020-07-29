@@ -13,7 +13,7 @@ use serenity::{
 #[check]
 #[name = "Guild"]
 async fn guild_check(_: &Context, msg: &Message, _: &mut Args, _: &CommandOptions) -> CheckResult {
-    (msg.guild_id.unwrap() == 546033322401464320).into()
+    (msg.guild_id.unwrap() == 165202235226062848).into()
 }
 
 #[command]
