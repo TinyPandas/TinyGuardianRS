@@ -24,8 +24,8 @@ struct Handler;
 impl EventHandler for Handler {
     async fn ready(&self, _: Context, ready: Ready) {
         println!("{} is connected!", ready.user.name);
-        lib::database::validate(&ready).await;
-        println!("Validated DB");
+        //lib::database::validate(&ready).await;
+        //println!("Validated DB");
     }
 
     async fn guild_member_addition(&self, ctx: Context, guild_id: GuildId, mut new_member: Member) {
