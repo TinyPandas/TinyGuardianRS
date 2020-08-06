@@ -68,16 +68,16 @@ impl EventHandler for Handler {
 #[group]
 #[owners_only]
 #[only_in(guilds)]
-#[commands(set, enable, holdlast, search)]
+#[commands(set, enable)]
 struct Owner;
 
 #[group]
 #[only_in(guilds)]
-#[commands(clear)]
+#[commands(clear, holdlast)]
 struct Staff;
 
 #[group]
-#[commands(ping, verify, support)]
+#[commands(ping, verify, support, search)]
 struct General;
 
 #[help]

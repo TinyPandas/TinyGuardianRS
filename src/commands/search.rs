@@ -62,7 +62,7 @@ async fn roblox_wiki(ctx: &Context, msg: &Message, query: &str) {
 #[command]
 #[min_args(2)]
 async fn search(_ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
-    let loc = args.single::<String>().unwrap();
+    let loc = args.single::<String>().unwrap().to_lowercase();
     let query = args.remains().unwrap();
 
     if loc.eq("wiki") || loc.eq("roblox") {
