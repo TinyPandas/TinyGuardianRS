@@ -35,7 +35,7 @@ async fn roblox_wiki(ctx: &Context, msg: &Message, query: &str) {
 
     let mut results = vec![];
 
-    for i in 1..records {
+    for i in 0..records {
         let cur_page = &page[i];
         let url = cur_page.get("url").unwrap().to_string();
         let title = cur_page.get("title").unwrap().to_string();
