@@ -16,7 +16,7 @@ use serenity::{
 mod lib;
 
 mod commands;
-use commands::{set::*, enable::*, ping::*, holdlast::*, verify::*, support::*, clear::*};
+use commands::{set::*, enable::*, ping::*, holdlast::*, verify::*, support::*, clear::*, search::*};
 
 struct Handler;
 
@@ -68,7 +68,7 @@ impl EventHandler for Handler {
 #[group]
 #[owners_only]
 #[only_in(guilds)]
-#[commands(set, enable, holdlast)]
+#[commands(set, enable, holdlast, search)]
 struct Owner;
 
 #[group]
@@ -133,6 +133,10 @@ async fn normal_message(ctx: &Context, msg: &Message) {
             }).await.unwrap();
             let _ = crate::lib::redisdb::set_value(&channel_id.to_string().as_str(), &new_message.id.to_string().as_str()).await;
         }
+    }
+
+    if msg.content.contains("!verify") {
+        crate::commands::verify::verify_call(&ctx, &msg).await;
     }
 }
 

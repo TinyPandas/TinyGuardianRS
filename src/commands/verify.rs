@@ -16,9 +16,7 @@ async fn guild_check(_: &Context, msg: &Message, _: &mut Args, _: &CommandOption
     (msg.guild_id.unwrap() == 165202235226062848).into()
 }
 
-#[command]
-#[checks(Guild)]
-async fn verify(_ctx: &Context, msg: &Message) -> CommandResult {
+pub async fn verify_call(_ctx: &Context, msg: &Message) {
     //let v = match args.single::<String>() {
     //    Ok(c) => {
     //        UserId::from(c.parse::<u64>().unwrap())
@@ -41,6 +39,12 @@ async fn verify(_ctx: &Context, msg: &Message) -> CommandResult {
             println!("Failed {:?}", _why);
         }
     }
+}
+
+#[command]
+#[checks(Guild)]
+async fn verify(_ctx: &Context, msg: &Message) -> CommandResult {
+    verify_call(_ctx, msg).await;
 
     Ok(())
 }
