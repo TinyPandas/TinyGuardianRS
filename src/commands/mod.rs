@@ -1,6 +1,7 @@
 pub mod clear;
 pub mod enable;
 pub mod holdlast;
+pub mod lua;
 pub mod ping;
 pub mod set;
 pub mod support;

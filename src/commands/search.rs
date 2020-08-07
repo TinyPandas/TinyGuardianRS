@@ -1,6 +1,6 @@
 use serenity::{
     prelude::Context,
-    model::channel::{Embed, EmbedField, Message},
+    model::channel::{Message},
     framework::standard::{
         Args, CommandResult, macros::{command}
     }

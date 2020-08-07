@@ -16,7 +16,7 @@ use serenity::{
 mod lib;
 
 mod commands;
-use commands::{set::*, enable::*, ping::*, holdlast::*, verify::*, support::*, clear::*, search::*};
+use commands::{set::*, enable::*, ping::*, holdlast::*, lua::*, verify::*, support::*, clear::*, search::*};
 
 struct Handler;
 
@@ -77,7 +77,7 @@ struct Owner;
 struct Staff;
 
 #[group]
-#[commands(ping, verify, support, search)]
+#[commands(ping, verify, support, search, lua)]
 struct General;
 
 #[help]
