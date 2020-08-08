@@ -1,3 +1,4 @@
+use std::time::{Duration, Instant};
 use serenity::{
     prelude::Context,
     model::channel::{Message},
@@ -5,7 +6,7 @@ use serenity::{
         Args, CommandResult, macros::{command}
     }
 };
-use rlua::{Lua, Result, Variadic, Value::Nil};
+use rlua::{Lua, Result, Variadic, Value::Nil, Table, HookTriggers, Error};
 
 #[command]
 #[min_args(1)]
@@ -13,6 +14,25 @@ pub async fn lua(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let lua = Lua::new();
     let src = args.remains().unwrap_or("print('NoCode')");
     
+    let start = Instant::now();
+
+    lua.set_hook(HookTriggers {every_line: true, ..Default::default()}, move |_lua_context, _debug| {
+        let now = Instant::now();
+        let dif = now.duration_since(start);
+        println!("{:?}", dif);
+        let mut err = false;
+
+        if dif.gt(&Duration::new(30, 0)) {
+            err = true
+        }
+
+        if err {
+            Err(Error::MemoryError(String::from("Instruction time exceeded.")))
+        } else {
+            Ok(())
+        }
+    });
+
     let result: Result<(String, String, String)> = lua.context(move |lua_ctx| {
         let globals = lua_ctx.globals();
         let mut res: Vec<String> = vec![];
@@ -29,8 +49,23 @@ pub async fn lua(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
                 Ok(())
             })?;
 
-            globals.set("os", Nil)?;
+            let os: Table = globals.get("os")?;
+            os.set("execute", Nil)?;
+            os.set("exit", Nil)?;
+            os.set("getenv", Nil)?;
+            os.set("remove", Nil)?;
+            os.set("rename", Nil)?;
+            os.set("setlocale", Nil)?;
+            os.set("tmpname", Nil)?;
+            globals.set("os", os)?;
             globals.set("io", Nil)?;
+            globals.set("debug", Nil)?;
+            globals.set("dofile", Nil)?;
+            globals.set("load", Nil)?;
+            globals.set("collectgarbage", Nil)?;
+            globals.set("require", Nil)?;
+            globals.set("loadfile", Nil)?;
+            globals.set("package", Nil)?;
 
             globals.set(
                 "print",
@@ -86,9 +121,16 @@ pub async fn lua(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     if env_out.len() == 0 {
         env_out = "No output.";
     }
+
+    if env_out.eq("") {
+        env_out = "No output.";
+    }
+    
     if env_err.len() == 0 {
         env_err = "No errors.";
     }
+
+    println!("{} | {}", env_out, env_err);
 
     let _ = msg.channel_id.send_message(ctx, |m| {
         m.embed(|e| {
