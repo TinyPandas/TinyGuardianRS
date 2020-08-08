@@ -93,6 +93,10 @@ pub async fn lua(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
             Ok(err_cap)
         })?;
 
+        if res.len() == 0 {
+            res.push(String::from("No output"));
+        }
+
         Ok((res.join("\n"), err.join("\n"), eval))
     });
 
@@ -104,9 +108,8 @@ pub async fn lua(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
             (String::from(""), String::from(""), why.to_string())
         }
     };
-    let out = r.0.as_str();
-    let user_err = r.1.as_str();
-    let comb = format!("{}\n{}", out, user_err);
+
+    let comb = format!("{}\n{}", r.0, r.1);
     let mut env_out = comb.as_str();
     let mut env_err = r.2.as_str();
 
@@ -115,22 +118,8 @@ pub async fn lua(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         env_out = &env_out[1..1500];
     }
     if env_err.len() > 1500 {
-        env_err = &user_err[1..1500];
+        env_err = &env_err[1..1500];
     }
-
-    if env_out.len() == 0 {
-        env_out = "No output.";
-    }
-
-    if env_out.eq("") {
-        env_out = "No output.";
-    }
-    
-    if env_err.len() == 0 {
-        env_err = "No errors.";
-    }
-
-    println!("{} | {}", env_out, env_err);
 
     let _ = msg.channel_id.send_message(ctx, |m| {
         m.embed(|e| {
