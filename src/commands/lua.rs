@@ -40,6 +40,7 @@ pub async fn lua(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
 
         let eval = lua_ctx.scope(|scope| {
             let func = scope.create_function_mut(|_, strings: Variadic<String>| {
+                
                 res.push(format!("[out]: {}", strings.join(" ")));
                 Ok(())
             })?;
@@ -67,15 +68,8 @@ pub async fn lua(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
             globals.set("loadfile", Nil)?;
             globals.set("package", Nil)?;
 
-            globals.set(
-                "print",
-                func,
-            )?;
-
-            globals.set(
-                "error",
-                err_func,
-            )?;
+            globals.set("print", func,)?;
+            globals.set("error", err_func,)?;
 
             let c = lua_ctx.load(src)
             .set_name("test")?
@@ -113,7 +107,7 @@ pub async fn lua(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let mut env_out = comb.as_str();
     let mut env_err = r.2.as_str();
 
-    let nick = msg.author.id.to_string();
+    let nick = msg.author.nick_in(ctx, msg.guild_id.unwrap()).await.unwrap_or(String::from("Failed to get nick."));
     if env_out.len() > 1500 {
         env_out = &env_out[1..1500];
     }
@@ -123,7 +117,7 @@ pub async fn lua(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
 
     let _ = msg.channel_id.send_message(ctx, |m| {
         m.embed(|e| {
-            e.title(format!("Code Eval for <@{}>", nick));
+            e.title(format!("Code Eval for {}", nick));
             e.field("Eval", env_out, false);
             e.field("Errors", env_err, false);
 
