@@ -16,7 +16,7 @@ use serenity::{
 mod lib;
 
 mod commands;
-use commands::{set::*, enable::*, ping::*, holdlast::*, lua::*, verify::*, support::*, clear::*, search::*};
+use commands::{set::*, ping::*, holdlast::*, lua::*, verify::*, support::*, clear::*, search::*};
 
 struct Handler;
 
@@ -68,7 +68,7 @@ impl EventHandler for Handler {
 #[group]
 #[owners_only]
 #[only_in(guilds)]
-#[commands(set, enable)]
+#[commands(set)]
 struct Owner;
 
 #[group]

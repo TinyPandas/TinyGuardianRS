@@ -15,13 +15,17 @@ use serenity::{
 };
 
 use crate::lib;
+use lib::util::*;
+use lib::database;
 
 #[command]
+#[min_args(1)]
+#[checks(Staff)]
 async fn holdlast(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let message = args.remains().unwrap();
     let guild_id = &msg.guild_id.unwrap();
     let channel_id = &msg.channel_id.to_string();
-    let settings_db: Database = lib::database::get_database("guild_settings");
+    let settings_db: Database = database::get_database("guild_settings");
     let settings: Collection = settings_db.collection("guild_settings");
     let delete = message.eq("disable");
     let key = format!("holdlast_{}", channel_id);
