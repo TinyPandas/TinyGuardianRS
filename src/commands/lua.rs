@@ -6,7 +6,7 @@ use serenity::{
         Args, CommandResult, macros::{command}
     }
 };
-use rlua::{Lua, Result, Variadic, Value::Nil, Table, HookTriggers, Error};
+use rlua::{Lua, Result, Variadic, prelude::LuaValue, Value::Nil, Table, HookTriggers, Error};
 
 #[command]
 #[min_args(1)]
@@ -39,9 +39,13 @@ pub async fn lua(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         let mut err: Vec<String> = vec![];
 
         let eval = lua_ctx.scope(|scope| {
-            let func = scope.create_function_mut(|_, strings: Variadic<String>| {
-                
-                res.push(format!("[out]: {}", strings.join(" ")));
+            let func = scope.create_function_mut(|_, strings: Variadic<LuaValue>| {
+                let mut result: Vec<String> = vec![];
+                for string in strings.iter() {
+                    result.push(format!("{:?}", string));
+                }
+
+                res.push(format!("[out]: {:?}", result.join(" ")));
                 Ok(())
             })?;
 
@@ -107,7 +111,7 @@ pub async fn lua(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let mut env_out = comb.as_str();
     let mut env_err = r.2.as_str();
 
-    let nick = msg.author.nick_in(ctx, msg.guild_id.unwrap()).await.unwrap_or(String::from("Failed to get nick."));
+    let nick = &msg.author.name;
     if env_out.len() > 1500 {
         env_out = &env_out[1..1500];
     }
