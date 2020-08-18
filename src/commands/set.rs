@@ -15,7 +15,20 @@ use serenity::{
 use crate::lib;
 
 #[command]
+#[description= "The set command is used to toggle features and assign properties on a guild basis. Any member/role with the ADMINISTRATOR permission will be able to utilize this command.\n\
+                The following settings and their expected values are below.\n\n\
+                ```\n\
+                active_welcome:    default: false      [true/false]\n\
+                welcome_message:   default: \"Welcome!\" [string]\n\
+                assign_new_member: default: false      [true/false]\n\
+                new_member_role:   default: 0          [roleId]\n\
+                prefix:            default: \"tg!\"      [string]\n\
+                staff_id:          default: 0          [roleId]\n\
+                ```\n\n\
+                For more information please visit [here](https://github.com/TinyPandas/TinyGuardianRS/wiki/Set-Command)"]
 #[min_args(2)]
+#[only_in(guilds)]
+#[required_permissions("ADMINISTRATOR")]
 async fn set(_ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let new_setting = args.single::<String>().unwrap();
     let new_value = args.remains().unwrap();

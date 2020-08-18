@@ -17,6 +17,7 @@ async fn not_guild_check(_: &Context, msg: &Message, _: &mut Args, _: &CommandOp
 }
 
 #[command]
+#[description="Provides invite for TinyGuardian support server."]
 #[checks(NotGuild)]
 async fn support(ctx: &Context, msg: &Message) -> CommandResult {
     let _ = msg.channel_id.send_message(ctx, |f| {

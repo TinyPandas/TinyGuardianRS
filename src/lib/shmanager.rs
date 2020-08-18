@@ -55,6 +55,18 @@ pub async fn update_member_roles(_ctx: &Context, discord_id: &str, guild: Partia
         }, None => ()
     }
 
+    println!("User {} has Moderation Voter role", data.roblox_username);
+    if data.permissions.MODERATE {
+        match guild.role_by_name("Moderation Voter") {
+            Some(role) => {
+                if !member.roles.contains(&role.id) {
+                    let _ = member.add_role(&_ctx, role.id).await;
+                    ()
+                }
+            }, None => ()
+        }
+    }
+
     println!("Completed.");
     Ok(())
 }

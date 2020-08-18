@@ -60,6 +60,11 @@ async fn roblox_wiki(ctx: &Context, msg: &Message, query: &str) {
 }
 
 #[command]
+#[description="Searches provided engine for query.\n\
+               To properly use these, pass the value in `()` to the command. `tg!search roblox <query>`\n\n```\n\
+               Current Engines:\n\
+               ----------------\n\
+               Roblox Wiki (roblox)\n\n```"]
 #[min_args(2)]
 async fn search(_ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let loc = args.single::<String>().unwrap().to_lowercase();
