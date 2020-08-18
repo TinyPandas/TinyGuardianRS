@@ -181,7 +181,6 @@ async fn execute(ctx: &Context, channel_id: ChannelId, src: String, author: Stri
 #[min_args(1)]
 pub async fn lua(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let src = args.remains().unwrap_or("print('NoCode')");
-
-    let _ = execute(ctx, msg.channel_id, src.to_string(), msg.author.name.to_string().to_owned());
+    let _ = execute(ctx, msg.channel_id, src.to_string(), msg.author.name.to_string().to_owned()).await;
     Ok(())
 }
