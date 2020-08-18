@@ -20,6 +20,8 @@ use lib::database;
 
 #[command]
 #[min_args(1)]
+#[description="`tg!holdlast <message>`\n\
+                Will attempt to make the last message in channel of execution message"]
 #[checks(Staff)]
 async fn holdlast(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let message = args.remains().unwrap();

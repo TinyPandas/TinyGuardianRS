@@ -14,6 +14,8 @@ use crate::lib::util::*;
 
 #[command]
 #[min_args(1)]
+#[description="`tg!clear <count> [userId]`\n\
+                Will attempt to clear `count` message. If `userId` is provided, will only remove that members messages."]
 #[checks(Staff)]
 async fn clear(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let delete_count = args.single::<u64>().unwrap();

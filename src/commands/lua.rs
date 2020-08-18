@@ -178,6 +178,7 @@ async fn execute(ctx: &Context, channel_id: ChannelId, src: String, author: Stri
 }
 
 #[command]
+#[description="Will attempt to compile into Lua and provide the output per standard compiler."]
 #[min_args(1)]
 pub async fn lua(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let src = args.remains().unwrap_or("print('NoCode')");

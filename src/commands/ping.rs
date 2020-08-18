@@ -13,6 +13,7 @@ use serenity::{
 use crate::lib;
 
 #[command]
+#[description="Returns latency of bot"]
 async fn ping(ctx: &Context, msg: &Message) -> CommandResult {
     // The shard manager is an interface for mutating, stopping, restarting, and
     // retrieving information about shards.

@@ -42,6 +42,7 @@ pub async fn verify_call(_ctx: &Context, msg: &Message) {
 }
 
 #[command]
+//#[description="Command used to associate ScriptingHelpers rank to discord account within [Scripting helpers discord](https://discord.gg/WHTAYrK)."]
 #[checks(Guild)]
 async fn verify(_ctx: &Context, msg: &Message) -> CommandResult {
     verify_call(_ctx, msg).await;
