@@ -9,9 +9,11 @@ use serenity::{
         macros::{group, help, hook},
     },
     http::Http,
-    model::{channel::{Message}, gateway::Ready, id::{UserId, GuildId, RoleId, MessageId}, guild::Member},
+    model::{channel::{Message}, gateway::{Ready, Activity}, id::{UserId, GuildId, RoleId, MessageId}, guild::Member},
     prelude::*,
 };
+
+
 
 mod lib;
 
@@ -20,10 +22,15 @@ use commands::{set::*, ping::*, holdlast::*, lua::*, verify::*, support::*, clea
 
 struct Handler;
 
+const MAJOR: i64 = 1;
+const MINOR: i64 = 0;
+const PATCH: i64 = 0;
+
 #[async_trait]
 impl EventHandler for Handler {
-    async fn ready(&self, _: Context, ready: Ready) {
+    async fn ready(&self, ctx: Context, ready: Ready) {
         println!("{} is connected!", ready.user.name);
+        let _ = ctx.set_activity(Activity::playing(format!("{}.{}.{}", MAJOR, MINOR, PATCH).as_str())).await;
         //lib::database::validate(&ready).await;
         //println!("Validated DB");
     }
