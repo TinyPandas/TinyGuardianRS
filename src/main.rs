@@ -24,13 +24,33 @@ struct Handler;
 
 const MAJOR: i64 = 1;
 const MINOR: i64 = 0;
-const PATCH: i64 = 0;
+const PATCH: i64 = 1;
 
 #[async_trait]
 impl EventHandler for Handler {
     async fn ready(&self, ctx: Context, ready: Ready) {
         println!("{} is connected!", ready.user.name);
         let _ = ctx.set_activity(Activity::playing(format!("{}.{}.{}", MAJOR, MINOR, PATCH).as_str())).await;
+
+        let home_guild = GuildId::from(546033322401464320).to_partial_guild(&ctx).await.unwrap();
+
+        //check guilds of bot, then verify owner in home guild, provide supporter role
+        //let x = ready.guilds;
+        //for guild_status in x {
+        //    let guild = match guild_status.id().to_partial_guild(&ctx).await {
+        //        Ok(guild) => {
+        //            let owner = guild.owner_id;
+        //            let member = home_guild.member(&ctx, owner).await.unwrap();
+        //            
+        //    
+        //            "Success"
+        //        }, Err(_why) => {
+        //
+        //            "Error"
+        //        }
+        //    };
+        //}
+
         //lib::database::validate(&ready).await;
         //println!("Validated DB");
     }
@@ -154,7 +174,7 @@ async fn main() {
 
     lib::database::db_setup().await;
 
-    let token = env::var("DISCORD_TOKEN_TEST").expect("Expected a token in the environment.");
+    let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment.");
 
     let http = Http::new_with_token(&token);
     let (owners, bot_id) = match http.get_current_application_info().await {
