@@ -1,5 +1,5 @@
 use bson::*;
-use mongodb::{Collection, Database};
+use mongodb::{Collection, Database, options::UpdateOptions};
 use std::{collections::{HashSet}, env, sync::Arc};
 use serenity::{
     async_trait,
@@ -34,6 +34,60 @@ impl EventHandler for Handler {
 
         //lib::database::validate(&ready).await;
         //println!("Validated DB");
+    }
+
+    async fn guild_member_update(&self, ctx: Context, old_data: Option<Member>, new_data: Member) {
+        match old_data {
+            Some(member) => {
+                let guild = member.guild_id;
+
+                let name_db = crate::lib::database::get_database("name_history");
+                let history_for_guild = name_db.collection(guild.to_string().as_str());
+
+                let filter = doc! {"_id" : &member.user.id.to_string()};
+                let user_history = crate::lib::database::get_document_from_collection(history_for_guild, filter).await;
+                
+                let old_username = &member.user.name;
+                let old_display_name = &member.display_name().to_string();
+                let old_tag = &member.user.discriminator;
+
+                let new_username = &new_data.user.name;
+                let new_display_name = &new_data.display_name().to_string();
+                let new_tag = &new_data.user.discriminator;
+
+                if !old_username.eq(new_username) {
+                    println!("Updated username");
+                    let username_col = name_db.collection(guild.to_string().as_str());
+                    let username_query = doc! {"_id" : &member.user.id.to_string()};
+                    let username_history = crate::lib::database::get_value_for_key(&user_history, String::from("previous_usernames"), String::from("")).await;
+                    let mut username_list = old_username.clone();
+                    if username_history.len() > 0 {
+                        username_list = format!("{}, {}", username_history, username_list);
+                    }
+                    let username_update = doc! {"$set" : {"previous_usernames" : username_list}};
+                    let res = username_col.update_one(username_query, username_update, UpdateOptions::builder().upsert(true).build()).await;
+                }
+
+                if !old_display_name.eq(new_display_name) {
+                    println!("Updated nickname");
+                    let display_name_col = name_db.collection(guild.to_string().as_str());
+                    let display_name_query = doc! {"_id" : &member.user.id.to_string()};
+                    let display_name_history = crate::lib::database::get_value_for_key(&user_history, String::from("previous_nicknames"), String::from("")).await;
+                    let mut display_name_list = old_display_name.clone();
+                    if display_name_history.len() > 0 {
+                        display_name_list = format!("{}, {}", display_name_history, display_name_list);
+                    }
+                    let display_name_update = doc! {"$set" : {"previous_nicknames" : display_name_list}};
+                    let res = display_name_col.update_one(display_name_query, display_name_update, UpdateOptions::builder().upsert(true).build()).await;
+                }
+
+                if old_tag != new_tag {
+                    println!("Updated discriminator");
+                }
+            }, None => {
+
+            }
+        }
     }
 
     async fn guild_member_addition(&self, ctx: Context, guild_id: GuildId, mut new_member: Member) {
@@ -155,7 +209,7 @@ async fn main() {
 
     lib::database::db_setup().await;
 
-    let token = env::var("DISCORD_TOKEN_TEST").expect("Expected a token in the environment.");
+    let token = env::var("DISCORD_TOKEN_TEST_FIX").expect("Expected a token in the environment.");
 
     let http = Http::new_with_token(&token);
     let (owners, bot_id) = match http.get_current_application_info().await {

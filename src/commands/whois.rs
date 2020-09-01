@@ -8,15 +8,28 @@ use serenity::{
     },  
 };
 use bson::*;
+use crate::lib;
+use lib::util::*;
 
 #[command]
-async fn whois(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
-    let author_id = &msg.author.id;
-    let author_str = &author_id.to_string();
-    let query = args.remains().unwrap_or(&author_str.as_str()).to_string();
+#[checks(Staff)]
+async fn whois(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+    let mut display_current = false;
+    let mut display_history = false;
+    let mut user_query = String::from("");
+
+    for arg in args.iter::<String>() {
+        let arg = arg.unwrap_or(String::from(""));
+        if arg.len() > 0 {
+            if arg.eq("-a") { display_history = true; }
+            else if arg.eq("-c") { display_current = true; }
+            else { user_query = arg }
+        }
+    }
+
     let guild = msg.guild_id.unwrap();
 
-    let target_id = crate::lib::util::get_user_id_from_query(ctx, guild, &query).await;
+    let target_id = crate::lib::util::get_user_id_from_query(ctx, guild, &user_query).await;
     let roblox_name = crate::lib::shmanager::get_roblox_name(target_id).await;
 
     if target_id > 0 {
@@ -27,19 +40,23 @@ async fn whois(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
                 let name_db = crate::lib::database::get_database("name_history");
                 let history_for_guild = name_db.collection(guild.to_string().as_str());
 
-                let query = doc! {"_id" : &member_in.user.id.as_str()};
-                let user_history = crate::lib::database::get_document_from_collection(history_for_guild, query).await;
+                let filter = doc! {"_id" : &member_in.user.id.to_string()};
+                let user_history = crate::lib::database::get_document_from_collection(history_for_guild, filter).await;
                 let past_usernames = crate::lib::database::get_value_for_key(&user_history, String::from("previous_usernames"), String::from("None")).await;
                 let past_nicknames = crate::lib::database::get_value_for_key(&user_history, String::from("previous_nicknames"), String::from("None")).await;
 
                 let _ = msg.channel_id.send_message(ctx, |m |{
                     m.embed(|e|{
-                        e.title(format!("Information for {}", query));
-                        e.field("Current Username", format!("{}#{}", &member_in.user.name, &member_in.user.discriminator), false);
-                        e.field("Current Nickname", &member_in.display_name(), false);
+                        e.title(format!("Information for {}", user_query));
+                        if display_current {
+                            e.field("Current Username", format!("{}#{}", &member_in.user.name, &member_in.user.discriminator), false);
+                            e.field("Current Nickname", &member_in.display_name(), false);
+                        }
                         e.field("Roblox Account", roblox_name, false);
-                        e.field("Past Usernames", past_usernames, false);
-                        e.field("Past Nicknames", past_nicknames, false);
+                        if display_history {
+                            e.field("Past Usernames", past_usernames, false);
+                            e.field("Past Nicknames", past_nicknames, false);
+                        }
                         e
                     });
                     m
