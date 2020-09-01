@@ -1,3 +1,4 @@
+use std::time::Duration;
 use serenity::{
     client::bridge::gateway::{ShardId},
     prelude::Context,
@@ -43,7 +44,8 @@ async fn ping(ctx: &Context, msg: &Message) -> CommandResult {
         },
     };
 
-    let _ = msg.reply(ctx, &format!("The shard latency is {:?}", runner.latency)).await;
+    let ping = runner.latency.unwrap_or(Duration::new(0, 0));
+    let _ = msg.reply(ctx, &format!("The shard latency is {:?}", ping)).await;
 
     Ok(())
 }
