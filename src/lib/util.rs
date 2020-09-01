@@ -72,9 +72,15 @@ pub async fn get_user_id_from_query(ctx: &Context, guild_id: GuildId, query: &St
                 match member_result {
                     Ok(member) => {
                         let display_name: String = member.display_name().into_owned();
-                        let distinct: String = member.distinct();
+                        let username = &member.user.name;
+                        let discrim = &member.user.discriminator;
+                        let distinct: String = format!("{}#{}", username, discrim);
                         let member_temp = format!("{}", member);
                         if display_name.eq(&query.to_string()) {
+                            target_id = member.user.id.into();
+                            break;
+                        }
+                        if username.eq(&query.to_string()) {
                             target_id = member.user.id.into();
                             break;
                         }

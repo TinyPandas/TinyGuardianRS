@@ -24,7 +24,7 @@ struct Handler;
 
 const MAJOR: i64 = 1;
 const MINOR: i64 = 1;
-const PATCH: i64 = 0;
+const PATCH: i64 = 1;
 
 #[async_trait]
 impl EventHandler for Handler {
