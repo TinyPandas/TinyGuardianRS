@@ -18,13 +18,13 @@ use serenity::{
 mod lib;
 
 mod commands;
-use commands::{set::*, ping::*, holdlast::*, lua::*, verify::*, support::*, clear::*, search::*};
+use commands::{set::*, ping::*, holdlast::*, lua::*, verify::*, support::*, clear::*, search::*, whois::*};
 
 struct Handler;
 
 const MAJOR: i64 = 1;
-const MINOR: i64 = 0;
-const PATCH: i64 = 2;
+const MINOR: i64 = 1;
+const PATCH: i64 = 0;
 
 #[async_trait]
 impl EventHandler for Handler {
@@ -81,7 +81,7 @@ struct Owner;
 
 #[group]
 #[only_in(guilds)]
-#[commands(clear, holdlast)]
+#[commands(clear, holdlast, whois)]
 struct Staff;
 
 #[group]
@@ -155,7 +155,7 @@ async fn main() {
 
     lib::database::db_setup().await;
 
-    let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment.");
+    let token = env::var("DISCORD_TOKEN_TEST").expect("Expected a token in the environment.");
 
     let http = Http::new_with_token(&token);
     let (owners, bot_id) = match http.get_current_application_info().await {

@@ -43,59 +43,122 @@ struct SHAccount {
     permissions: Permissions,
 }
 
+pub async fn get_roblox_name(discord_id: u64) -> String {
+    let roblox_acc = get_roblox_account(discord_id.to_string().as_str()).await;
+
+    let res = match roblox_acc {
+        Some(r) => {
+            format!("{} [{}]", r.robloxUsername, r.robloxId)
+        }, None => {
+            String::from("No associated roblox account.")
+        }
+    };
+
+    res
+}
+
+async fn get_roblox_account(discord_id: &str) -> Option<RobloxAccount> {
+    let res = match reqwest::get(format!("https://verify.eryn.io/api/user/{}", discord_id).as_str()).await {
+        Ok(r) => {
+            match r.json::<RobloxAccount>().await {
+                Ok(r) => {
+                    Some(r)
+                }, Err(_why) => {
+                    None
+                }
+            }
+        }, Err(_why) => {
+            None
+        }
+    };
+
+    res
+}
+
+async fn get_sh_account(roblox_acc: RobloxAccount) -> Option<SHAccount> {
+    let res = match reqwest::get(format!("https://scriptinghelpers.org/resources/get_profile_by_roblox_id/{}", roblox_acc.robloxId).as_str()).await {
+        Ok(r) => {
+            match r.json::<SHAccount>().await {
+                Ok(s) => {
+                    Some(s)
+                }, Err(_why) => {
+                    None
+                }
+            }
+        }, Err(_why) => {
+            None
+        }
+    };
+
+    res
+}
+
 pub async fn update_member_roles(_ctx: &Context, discord_id: &str, guild: PartialGuild, mut member: Member, channel_id: ChannelId) -> Result<(), Box<dyn std::error::Error>> {
     println!("Fetching data for {}", &discord_id);
-    let resp: RobloxAccount = reqwest::get(format!("https://verify.eryn.io/api/user/{}", discord_id).as_str()).await?.json::<RobloxAccount>().await?;
-    let data: SHAccount = reqwest::get(format!("https://scriptinghelpers.org/resources/get_profile_by_roblox_id/{}", resp.robloxId).as_str()).await?.json::<SHAccount>().await?;
+    let resp = get_roblox_account(&discord_id).await;
+    match resp {
+        Some(roblox_acc) => {
+            let data = get_sh_account(roblox_acc).await;
     
-    let sh_roles = vec!["Beginner", "Asker", "Inquisitor", "Contributor", "Researcher", "Academic", "Educator", "Professor", "Intellectual", "Scholar", "Expert", "Master"];
-    let mut current = false;
-
-    println!("User {} is rank {} with {} rep", data.roblox_username, data.rank, data.reputation);
-    for role in sh_roles {
-        if !role.eq(data.rank.as_str()) {
-            match guild.role_by_name(role) {
-                Some(g_role) => {
-                    if member.roles.contains(&g_role.id) {
-                        let _ = member.remove_role(&_ctx, g_role.id).await;
+            match data {
+                Some(sh_acc) => {
+                    let sh_roles = vec!["Beginner", "Asker", "Inquisitor", "Contributor", "Researcher", "Academic", "Educator", "Professor", "Intellectual", "Scholar", "Expert", "Master"];
+                    let mut current = false;
+        
+                    println!("User {} is rank {} with {} rep", sh_acc.roblox_username, sh_acc.rank, sh_acc.reputation);
+                    for role in sh_roles {
+                        if !role.eq(sh_acc.rank.as_str()) {
+                            match guild.role_by_name(role) {
+                                Some(g_role) => {
+                                    if member.roles.contains(&g_role.id) {
+                                        let _ = member.remove_role(&_ctx, g_role.id).await;
+                                    }
+                                }, None => {}
+                            }
+                        } else {
+                            match guild.role_by_name(sh_acc.rank.as_str()) {
+                                Some(a_role) => {
+                                    if member.roles.contains(&a_role.id) {
+                                        current = true;
+                                    } else {
+                                        let _ = member.add_role(&_ctx, a_role.id).await;
+                                    }
+                                    
+                                    ()
+                                }, None => ()
+                            }
+                        }
                     }
-                }, None => {}
-            }
-        } else {
-            match guild.role_by_name(data.rank.as_str()) {
-                Some(a_role) => {
-                    if member.roles.contains(&a_role.id) {
-                        current = true;
-                    } else {
-                        let _ = member.add_role(&_ctx, a_role.id).await;
+        
+                    let _ = channel_id.send_message(&_ctx, |m| {
+                        if current {
+                            m.content(format!("Roles are current! Role: {} [Rep: {}]", sh_acc.rank, sh_acc.reputation));
+                        } else {
+                            m.content(format!("Updated roles! New Role: {} [Rep: {}]", sh_acc.rank, sh_acc.reputation));
+                        }
+                        m
+                    }).await;
+        
+                    println!("User {} has Moderation Voter role", sh_acc.roblox_username);
+                    if sh_acc.permissions.MODERATE {
+                        match guild.role_by_name("Moderation Voter") {
+                            Some(role) => {
+                                if !member.roles.contains(&role.id) {
+                                    let _ = member.add_role(&_ctx, role.id).await;
+                                    ()
+                                }
+                            }, None => ()
+                        }
                     }
-                    
-                    ()
-                }, None => ()
-            }
-        }
-    }
-
-    let _ = channel_id.send_message(&_ctx, |m| {
-        if current {
-            m.content(format!("Roles are current! Role: {} [Rep: {}]", data.rank, data.reputation));
-        } else {
-            m.content(format!("Updated roles! New Role: {} [Rep: {}]", data.rank, data.reputation));
-        }
-        m
-    }).await;
-
-    println!("User {} has Moderation Voter role", data.roblox_username);
-    if data.permissions.MODERATE {
-        match guild.role_by_name("Moderation Voter") {
-            Some(role) => {
-                if !member.roles.contains(&role.id) {
-                    let _ = member.add_role(&_ctx, role.id).await;
-                    ()
+                }, None => {
+        
                 }
-            }, None => ()
+            }
+        }, None => {
+
         }
     }
+    
 
     println!("Completed.");
     Ok(())

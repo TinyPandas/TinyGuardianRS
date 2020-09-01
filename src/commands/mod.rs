@@ -6,3 +6,4 @@ pub mod set;
 pub mod support;
 pub mod search;
 pub mod verify;
+pub mod whois;
