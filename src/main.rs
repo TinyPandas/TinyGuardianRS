@@ -18,13 +18,13 @@ use serenity::{
 mod lib;
 
 mod commands;
-use commands::{set::*, ping::*, holdlast::*, lua::*, verify::*, support::*, clear::*, search::*, whois::*};
+use commands::{set::*, ping::*, holdlast::*, lua::*, verify::*, support::*, clear::*, search::*, warn::*, whois::*};
 
 struct Handler;
 
 const MAJOR: i64 = 1;
 const MINOR: i64 = 1;
-const PATCH: i64 = 1;
+const PATCH: i64 = 2;
 
 #[async_trait]
 impl EventHandler for Handler {
@@ -135,7 +135,7 @@ struct Owner;
 
 #[group]
 #[only_in(guilds)]
-#[commands(clear, holdlast, whois)]
+#[commands(clear, holdlast, whois, warn)]
 struct Staff;
 
 #[group]
