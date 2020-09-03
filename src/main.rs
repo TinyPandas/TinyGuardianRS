@@ -24,7 +24,7 @@ struct Handler;
 
 const MAJOR: i64 = 1;
 const MINOR: i64 = 1;
-const PATCH: i64 = 2;
+const PATCH: i64 = 3;
 
 #[async_trait]
 impl EventHandler for Handler {
@@ -209,7 +209,7 @@ async fn main() {
 
     lib::database::db_setup().await;
 
-    let token = env::var("DISCORD_TOKEN_TEST_FIX").expect("Expected a token in the environment.");
+    let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment.");
 
     let http = Http::new_with_token(&token);
     let (owners, bot_id) = match http.get_current_application_info().await {
