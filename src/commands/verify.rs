@@ -23,7 +23,6 @@ pub async fn verify_call(_ctx: &Context, msg: &Message) {
     //        msg.author.id
     //    }
     //};
-
     if msg.guild_id.unwrap() == 165202235226062848 {
         let author_id = msg.author.id;
 
@@ -50,7 +49,7 @@ pub async fn verify_call(_ctx: &Context, msg: &Message) {
 
         if can_verify {
             let settings = settings_db.collection("verify_track");
-            let update = settings.update_one(doc! {"_id" : &author_id.to_string()}, doc! {"last_check" : current.to_string()}, UpdateOptions::builder().upsert(true).build()).await.unwrap();
+            let _update = settings.update_one(doc! {"_id" : &author_id.to_string()}, doc! {"last_check" : current.to_string()}, UpdateOptions::builder().upsert(true).build()).await.unwrap();
             
             let guild_id = msg.guild_id.unwrap();
             let guild = guild_id.to_partial_guild(&_ctx).await.unwrap();

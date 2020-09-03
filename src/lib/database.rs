@@ -104,6 +104,7 @@ pub async fn validate(bot_data: &Ready) {
                 if doc_contains_key(&doc, "new_member_role").await == false { set_default(&guild_id, "new_member_role", "").await; };
                 if doc_contains_key(&doc, "prefix").await == false { set_default(&guild_id, "prefix", "tg!").await; };
                 if doc_contains_key(&doc, "staff_id").await == false { set_default(&guild_id, "staff_id", "").await; };
+                if doc_contains_key(&doc, "infraction_log_channel").await == false { set_default(&guild_id, "infraction_log_channel", "").await; };
             }, None => {
                 //create document
                 println!("Create");
@@ -116,6 +117,7 @@ pub async fn validate(bot_data: &Ready) {
                 set_default(&guild_id, "new_member_role", "").await;
                 set_default(&guild_id, "prefix", "tg!").await;
                 set_default(&guild_id, "staff_id", "").await;
+                set_default(&guild_id, "infraction_log_channel", "").await;
             }
         }
     }

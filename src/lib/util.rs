@@ -4,7 +4,15 @@ use mongodb::{Collection, Database};
 use serenity::{
     client::bridge::gateway::ShardManager,
     framework::standard::{Args, CommandOptions, CheckResult, macros::{check}},
-    model::{channel::{Message}},
+    model::{
+        channel::{
+            Message
+        },
+        id::{
+            GuildId
+        }
+    },
+    futures::StreamExt
 };
 use serenity::prelude::*;
 use tokio::sync::Mutex;
@@ -47,4 +55,49 @@ async fn staff_check(_: &Context, msg: &Message, _: &mut Args, _: &CommandOption
     };
 
     CheckResult::from(success)
+}
+
+pub async fn get_user_id_from_query(ctx: &Context, guild_id: GuildId, query: &String) -> u64 {
+    let possible_mention = query.replace("!", "");
+
+    let mut target_id: u64 = 0;
+
+    match query.parse::<u64>() {
+        Ok(user_id) => {
+            target_id = user_id;
+        },
+        Err(_why) => {
+            let mut members = guild_id.members_iter(&ctx.http).boxed();
+            while let Some(member_result) = members.next().await {
+                match member_result {
+                    Ok(member) => {
+                        let display_name: String = member.display_name().into_owned();
+                        let username = &member.user.name;
+                        let discrim = &member.user.discriminator;
+                        let distinct: String = format!("{}#{}", username, discrim);
+                        let member_temp = format!("{}", member);
+                        if display_name.eq(&query.to_string()) {
+                            target_id = member.user.id.into();
+                            break;
+                        }
+                        if username.eq(&query.to_string()) {
+                            target_id = member.user.id.into();
+                            break;
+                        }
+                        if distinct.eq(&query.to_string()) {
+                            target_id = member.user.id.into();
+                            break;
+                        }
+                        if member_temp.eq(&possible_mention.to_string()) {
+                            target_id = member.user.id.into();
+                            break;
+                        }
+                    },
+                    Err(error) => eprintln!("Uh oh!  Error: {}", error),
+                }
+            }
+        }
+    }
+
+    target_id
 }
