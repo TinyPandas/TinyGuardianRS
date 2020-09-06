@@ -171,8 +171,6 @@ pub async fn update_member_roles(_ctx: &Context, discord_id: &str, guild: Partia
         
                     let _ = channel_id.send_message(&_ctx, |m| {
                         if current {
-                            m.content("Should embed.");
-
                             let progress = format!("Reputation: {}/{}\n\
                             Questions Asked: {}/{}\n\
                             Questions Answerd: {}/{}\n\
