@@ -12,17 +12,21 @@ use crate::lib;
 use lib::util::*;
 
 #[command]
-#[checks(Staff)]
 async fn whois(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let mut display_current = false;
     let mut display_history = false;
+    let mut display_notes = false;
     let mut user_query = String::from("");
+    let is_staff = is_staff(msg).await;
+
+    println!("{} staff status: {}", &msg.author.name, is_staff);
 
     for arg in args.iter::<String>() {
         let arg = arg.unwrap_or(String::from(""));
         if arg.len() > 0 {
             if arg.eq("-a") { display_history = true; }
             else if arg.eq("-c") { display_current = true; }
+            else if arg.eq("-n") && is_staff { display_notes = true; }
             else { user_query = arg }
         }
     }
@@ -44,6 +48,7 @@ async fn whois(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                 let user_history = crate::lib::database::get_document_from_collection(history_for_guild, filter).await;
                 let past_usernames = crate::lib::database::get_value_for_key(&user_history, String::from("previous_usernames"), String::from("None")).await;
                 let past_nicknames = crate::lib::database::get_value_for_key(&user_history, String::from("previous_nicknames"), String::from("None")).await;
+                let notes = crate::lib::database::get_value_for_key(&user_history, String::from("notes"), String::from("None")).await;
 
                 let _ = msg.channel_id.send_message(ctx, |m |{
                     m.embed(|e|{
@@ -56,6 +61,9 @@ async fn whois(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                         if display_history {
                             e.field("Past Usernames", past_usernames, false);
                             e.field("Past Nicknames", past_nicknames, false);
+                        }
+                        if display_notes {
+                            e.field("Moderation Notes", notes, false);
                         }
                         e
                     });

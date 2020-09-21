@@ -27,7 +27,6 @@ struct Permissions {
     CHAT_ADMIN: bool,
 }
 
-//"stats":{"questions":22,"answers":18,"accepted_answers":9,"upvotes_received":7}}
 #[derive(Serialize, Deserialize)]
 struct Stats {
     questions: i64,

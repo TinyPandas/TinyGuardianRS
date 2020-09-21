@@ -13,3 +13,5 @@ pub mod set;
 pub mod clear;
 pub mod warn;
 pub mod whois;
+pub mod addnote;
+pub mod removenote;
