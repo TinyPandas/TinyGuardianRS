@@ -25,10 +25,7 @@ impl TypeMapKey for ShardManagerContainer {
     type Value = Arc<Mutex<ShardManager>>;
 }
 
-#[check]
-#[name="Staff"]
-async fn staff_check(_: &Context, msg: &Message, _: &mut Args, _: &CommandOptions) -> CheckResult {
-    println!("Staff check begin");
+pub async fn is_staff(msg: &Message) -> bool {
     let guild_id = &msg.guild_id;
     let settings_db: Database = lib::database::get_database("guild_settings");
     let settings: Collection = settings_db.collection("guild_settings");
@@ -54,7 +51,13 @@ async fn staff_check(_: &Context, msg: &Message, _: &mut Args, _: &CommandOption
         }, None => false,
     };
 
-    CheckResult::from(success)
+    success
+}
+
+#[check]
+#[name="Staff"]
+async fn staff_check(_: &Context, msg: &Message, _: &mut Args, _: &CommandOptions) -> CheckResult {
+    CheckResult::from(is_staff(msg).await)
 }
 
 pub async fn get_user_id_from_query(ctx: &Context, guild_id: GuildId, query: &String) -> u64 {
