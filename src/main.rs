@@ -247,7 +247,7 @@ async fn main() {
         data.insert::<lib::util::ShardManagerContainer>(Arc::clone(&client.shard_manager));
     }
 
-    if let Err(why) = client.start().await {
+    if let Err(why) = client.start_shards(4).await {
         println!("Client error: {:?}", why);
     }
 }
