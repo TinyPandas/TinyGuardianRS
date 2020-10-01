@@ -34,6 +34,8 @@ async fn execute(ctx: &Context, channel_id: ChannelId, src: String, author: Stri
             }
         });
 
+        lua.set_memory_limit(Some(1024*1024*64));
+
         let result: rlua::Result<(String, String, String)> = lua.context(move |lua_ctx| {
             let globals = lua_ctx.globals();
             let mut res: Vec<String> = vec![];
@@ -105,7 +107,7 @@ async fn execute(ctx: &Context, channel_id: ChannelId, src: String, author: Stri
                 globals.set("debug", Nil)?;
                 globals.set("dofile", Nil)?;
                 globals.set("load", Nil)?;
-                globals.set("collectgarbage", Nil)?;
+                //globals.set("collectgarbage", Nil)?;
                 globals.set("require", Nil)?;
                 globals.set("loadfile", Nil)?;
                 globals.set("package", Nil)?;
@@ -181,7 +183,10 @@ async fn execute(ctx: &Context, channel_id: ChannelId, src: String, author: Stri
 #[description="Will attempt to compile into Lua and provide the output per standard compiler."]
 #[min_args(1)]
 pub async fn lua(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
-    let src = args.remains().unwrap_or("print('NoCode')");
-    let _ = execute(ctx, msg.channel_id, src.to_string(), msg.author.name.to_string().to_owned()).await;
+    let src_str = args.remains().unwrap_or("print('NoCode')");
+    let src_str_2 = &str::replace(src_str, "```lua", "");
+    let src_str_3 = &str::replace(src_str_2, "```", "");
+    let src_str_4 = &str::replace(src_str_3, "`", "");
+    let _ = execute(ctx, msg.channel_id, src_str_4.to_string(), msg.author.name.to_string().to_owned()).await;
     Ok(())
 }

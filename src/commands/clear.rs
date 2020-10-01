@@ -35,20 +35,23 @@ async fn clear(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     }).await?;
 
     let mut count = 0;
-
-    for message in messages {
-        match &id {
-            Some(_id) => {
+    
+    match &id {
+        Some(_id) => {
+            let mut msg_by_auth = vec![];
+            for message in messages {
                 if message.author.id == _id.to_owned() {
                     if count < delete_count {
-                        let _ = message.delete(ctx).await;
+                        //let _ = message.delete(ctx).await;
+                        msg_by_auth.insert(msg_by_auth.len()+1, message.id);
                         count = count + 1;
                     }
                 }
-            }, None => {
-                let _ = message.delete(ctx).await;
             }
-        };
+            let _ = msg.channel_id.delete_messages(&ctx.http, msg_by_auth).await;
+        }, None => {
+            let _ = msg.channel_id.delete_messages(&ctx.http, messages).await;
+        }
     }
 
     let _ = msg.delete(ctx).await;

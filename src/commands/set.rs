@@ -40,7 +40,9 @@ async fn set(_ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         Some(id) => {
             let query = doc! {"_id" : &id.to_string(), &new_setting: {"$exists": true}};
             let update = doc! {"$set" : {&new_setting : new_value}};
-            let res = settings.update_one(query, update, UpdateOptions::builder().upsert(false).build()).await.unwrap();
+            let upsert = new_setting.eq("staff_id") || new_setting.eq("prefix");
+            let res = settings.update_one(query, update, UpdateOptions::builder().upsert(upsert).build()).await.unwrap();
+            println!("Modified: {}", res.modified_count);
             res.modified_count > 0
         }, None => false,
     };

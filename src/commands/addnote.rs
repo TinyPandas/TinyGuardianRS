@@ -23,7 +23,8 @@ async fn addnote(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult 
     if note.len() == 0 {
         let _ = msg.reply(&ctx, "Did not add note.").await;
     } else {
-        let target_id = get_user_id_from_query(ctx, guild, &user_query).await;
+        let target_id_result = get_user_id_from_query(ctx, guild, &user_query).await;
+        let target_id = target_id_result.0;
         if target_id > 0 {
             let name_db = crate::lib::database::get_database("name_history");
             let history_for_guild = name_db.collection(guild.to_string().as_str());

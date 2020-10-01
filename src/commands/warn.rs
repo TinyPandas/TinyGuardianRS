@@ -31,7 +31,8 @@ async fn warn(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
     match user_query {
         Ok(query) => {
-            let user_id = get_user_id_from_query(&ctx, msg.guild_id.unwrap(), &query).await;
+            let user_id_result = get_user_id_from_query(&ctx, msg.guild_id.unwrap(), &query).await;
+            let user_id = user_id_result.0;
             let reason = args.remains().unwrap_or("No reason provided.");
             let moderator = msg.author.id;
 

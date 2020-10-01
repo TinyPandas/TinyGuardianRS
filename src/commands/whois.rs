@@ -33,48 +33,67 @@ async fn whois(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
     let guild = msg.guild_id.unwrap();
 
-    let target_id = crate::lib::util::get_user_id_from_query(ctx, guild, &user_query).await;
-    let roblox_name = crate::lib::shmanager::get_roblox_name(target_id).await;
+    if user_query.eq("") {
+        user_query = msg.author.name.to_owned();
+    }
 
-    if target_id > 0 {
-        let member = guild.member(&ctx.http, target_id).await;
+    let target_id_res = crate::lib::util::get_user_id_from_query(ctx, guild, &user_query).await;
+    let target_id = target_id_res.0;
+    let member_count = target_id_res.1;
+    let member_list = target_id_res.2;
 
-        match member {
-            Ok(member_in) => {
-                let name_db = crate::lib::database::get_database("name_history");
-                let history_for_guild = name_db.collection(guild.to_string().as_str());
-
-                let filter = doc! {"_id" : &member_in.user.id.to_string()};
-                let user_history = crate::lib::database::get_document_from_collection(history_for_guild, filter).await;
-                let past_usernames = crate::lib::database::get_value_for_key(&user_history, String::from("previous_usernames"), String::from("None")).await;
-                let past_nicknames = crate::lib::database::get_value_for_key(&user_history, String::from("previous_nicknames"), String::from("None")).await;
-                let notes = crate::lib::database::get_value_for_key(&user_history, String::from("notes"), String::from("None")).await;
-
-                let _ = msg.channel_id.send_message(ctx, |m |{
-                    m.embed(|e|{
-                        e.title(format!("Information for {}", user_query));
-                        if display_current {
-                            e.field("Current Username", format!("{}#{}", &member_in.user.name, &member_in.user.discriminator), false);
-                            e.field("Current Nickname", &member_in.display_name(), false);
-                        }
-                        e.field("Roblox Account", roblox_name, false);
-                        if display_history {
-                            e.field("Past Usernames", past_usernames, false);
-                            e.field("Past Nicknames", past_nicknames, false);
-                        }
-                        if display_notes {
-                            e.field("Moderation Notes", notes, false);
-                        }
-                        e
-                    });
-                    m
-                }).await;
-            }, Err(_why) => {
-                let _err_reply = msg.reply(&ctx, "Failed member lookup.").await;
+    if member_count > 1 {
+        let _ = msg.channel_id.send_message(&ctx.http, |f| {
+            if member_count > 10 {
+                f.content(format!("Multiple users found with the provided query. [More than 10 users]"));
+            } else {
+                f.content(format!("Multiple users found with the provided query. [{}]", member_list));
             }
-        } 
+            f
+        }).await;
     } else {
-        let _ = msg.reply(&ctx, "No members were found with the provided query.").await;
+        let roblox_name = crate::lib::shmanager::get_roblox_name(target_id).await;
+
+        if target_id > 0 {
+            let member = guild.member(&ctx.http, target_id).await;
+
+            match member {
+                Ok(member_in) => {
+                    let name_db = crate::lib::database::get_database("name_history");
+                    let history_for_guild = name_db.collection(guild.to_string().as_str());
+
+                    let filter = doc! {"_id" : &member_in.user.id.to_string()};
+                    let user_history = crate::lib::database::get_document_from_collection(history_for_guild, filter).await;
+                    let past_usernames = crate::lib::database::get_value_for_key(&user_history, String::from("previous_usernames"), String::from("None")).await;
+                    let past_nicknames = crate::lib::database::get_value_for_key(&user_history, String::from("previous_nicknames"), String::from("None")).await;
+                    let notes = crate::lib::database::get_value_for_key(&user_history, String::from("notes"), String::from("None")).await;
+
+                    let _ = msg.channel_id.send_message(ctx, |m |{
+                        m.embed(|e|{
+                            e.title(format!("Information for {}", member_in.display_name()));
+                            if display_current {
+                                e.field("Current Username", format!("{}#{}", &member_in.user.name, &member_in.user.discriminator), false);
+                                e.field("Current Nickname", &member_in.display_name(), false);
+                            }
+                            e.field("Roblox Account", roblox_name, false);
+                            if display_history {
+                                e.field("Past Usernames", past_usernames, false);
+                                e.field("Past Nicknames", past_nicknames, false);
+                            }
+                            if display_notes {
+                                e.field("Moderation Notes", notes, false);
+                            }
+                            e
+                        });
+                        m
+                    }).await;
+                }, Err(_why) => {
+                    let _err_reply = msg.reply(&ctx, "Failed member lookup.").await;
+                }
+            } 
+        } else {
+            let _ = msg.reply(&ctx, "No members were found with the provided query.").await;
+        }
     }
 
     Ok(())

@@ -8,6 +8,8 @@ use serenity::{
     }
 };
 
+use std::env;
+
 static MONGO: OnceCell<Client> = OnceCell::new();
 
 fn get_client() -> &'static Client {
@@ -16,8 +18,14 @@ fn get_client() -> &'static Client {
 
 pub async fn db_setup() {
     println!("Setting up DB.");
+    
+    let user = env::var("MONGO_USER").expect("Expected a username in the environment.");
+    let pass = env::var("MONGO_PASSWORD").expect("Expected a password in the environment.");
+    let conn = env::var("MONGO_CONNECT").expect("Expected a connection path in the environment.");
+    let db = String::from("test_db");
+    let connect = format!("mongodb+srv://{}:{}@{}/{}?retryWrites=true&w=majority", user, pass, conn, db);
 
-    let client = match Client::with_uri_str("mongodb://localhost:27017").await {
+    let client = match Client::with_uri_str(&connect.as_str()).await {
         Ok(client) => {
             println!("Connected to DB.");
             Some(client)

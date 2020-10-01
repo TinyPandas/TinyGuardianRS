@@ -4,6 +4,7 @@ pub mod ping;
 pub mod support;
 pub mod search;
 pub mod verify;
+pub mod codeblock;
 
 //Staff commands
 pub mod holdlast;

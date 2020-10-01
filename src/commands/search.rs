@@ -7,9 +7,20 @@ use serenity::{
 };
 use serde::{Deserialize, Serialize};
 use serde_json::{Value};
+use select::{
+    document::Document,
+    predicate::{
+        Predicate,
+        Attr,
+        Class,
+        Name
+    }
+};
 
 const API_BEGIN: &str = "https://api.swiftype.com/api/v1/public/engines/search.json?callback=jQuery33107513732778347277_1562848671664&q=";
 const API_END: &str = "&engine_key=PcoWSkbVqDnWTu_dm2ix&page=1&per_page=5&fetch_fields%5Bpage%5D%5B%5D=title&fetch_fields%5Bpage%5D%5B%5D=body&fetch_fields%5Bpage%5D%5B%5D=category&fetch_fields%5Bpage%5D%5B%5D=url&fetch_fields%5Bpage%5D%5B%5D=segment&fetch_fields%5Bpage%5D%5B%5D=summary&spelling=strict&highlight_fields%5Bpage%5D%5Bbody%5D%5Bfallback%5D=false&_=1562848671665";
+
+const LUA_PIL_PREFIX: &str = "https://www.lua.org/manual/5.4/manual.html";
 
 #[derive(Serialize, Deserialize)]
 struct RobloxResult {
@@ -17,6 +28,25 @@ struct RobloxResult {
     records: Value,
     info: Value,
     errors: Value
+}
+
+async fn lua_pil(ctx: &Context, msg: &Message, query: &str) {
+    println!("{}", query);
+    let name = format!("pdf-{}", query);
+    println!("ATTR: {}", name);
+
+    let document = Document::from(LUA_PIL_PREFIX);
+    
+
+    for node in document.find(Name(name.as_str())) {
+        println!("{} ({:?})", node.text(), node.attr("href").unwrap());
+    }
+
+    for node in document.find(Attr("name", name.as_str()).descendant(Name("h3"))) {
+        println!("{} ({:?})", node.text(), node.attr("href").unwrap());
+    }
+
+    println!("Completed.");
 }
 
 async fn roblox_wiki(ctx: &Context, msg: &Message, query: &str) {
@@ -72,6 +102,8 @@ async fn search(_ctx: &Context, msg: &Message, mut args: Args) -> CommandResult 
 
     if loc.eq("wiki") || loc.eq("roblox") {
         let _ = roblox_wiki(&_ctx, &msg, &query).await;
+    } else if loc.eq("lua") || loc.eq("pil") {
+        let _ = lua_pil(&_ctx, &msg, &query).await;
     }
 
     Ok(())

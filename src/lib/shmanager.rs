@@ -139,9 +139,17 @@ pub async fn update_member_roles(_ctx: &Context, discord_id: &str, guild: Partia
                     println!("SH account");
                     let sh_roles = vec!["Beginner", "Asker", "Inquisitor", "Contributor", "Researcher", "Academic", "Educator", "Professor", "Intellectual", "Scholar", "Expert", "Master"];
                     let mut current = false;
-                    let next_role_index = &sh_roles.iter().position(|&x| x.eq(sh_acc.rank.as_str())).unwrap_or(0)+1;
-                    let next_role_str = &sh_roles.get(next_role_index.to_owned()).unwrap_or(&"Beginner").to_owned();
-                    let next_role = rank_vec.get(next_role_index.to_owned()).unwrap();
+                    let max = sh_acc.rank.eq("Master");
+                    let mut next_role_index = 1;
+                    let mut next_role_str = "";
+                    let mut next_role = rank_vec.get(next_role_index.to_owned()).unwrap();
+                    if !max {
+                        next_role_index = &sh_roles.iter().position(|&x| x.eq(sh_acc.rank.as_str())).unwrap_or(0)+1;
+                        next_role_str = &sh_roles.get(next_role_index.to_owned()).unwrap_or(&"Beginner").to_owned();
+                        next_role = rank_vec.get(next_role_index.to_owned()).unwrap();
+                    } else {
+                        next_role_str = "No next rank.";
+                    }
         
                     println!("User {} is rank {} with {} rep", sh_acc.roblox_username, sh_acc.rank, sh_acc.reputation);
                     for role in sh_roles {
@@ -181,12 +189,16 @@ pub async fn update_member_roles(_ctx: &Context, discord_id: &str, guild: Partia
                             &sh_acc.stats.accepted_answers, &next_role.accepted_answers,
                             &sh_acc.stats.upvotes_received, &next_role.upvotes_received);
 
+                            let mut desc = "Progress to next rank";
+                            if max {
+                                desc = "Current Stats";
+                            }
                             println!("{}", progress);
                             m.embed(|e| {
                                 e.title("Rank Information");
                                 e.field("Current Rank", &sh_acc.rank, false);
                                 e.field("Next Rank", next_role_str, false);
-                                e.field("Progress to next rank", progress, false);
+                                e.field(desc, progress, false);
 
                                 e
                             });

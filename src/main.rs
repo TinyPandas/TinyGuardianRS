@@ -1,5 +1,5 @@
 use bson::*;
-use mongodb::{Collection, Database, options::UpdateOptions};
+use mongodb::{Collection, Database};
 use std::{collections::{HashSet}, env, sync::Arc};
 use serenity::{
     async_trait,
@@ -18,11 +18,11 @@ use serenity::{
 mod lib;
 
 mod commands;
-use commands::{set::*, ping::*, holdlast::*, lua::*, verify::*, support::*, clear::*, search::*, warn::*, whois::*, addnote::*, removenote::*};
+use commands::{set::*, ping::*, holdlast::*, lua::*, verify::*, support::*, clear::*, search::*, warn::*, whois::*, addnote::*, removenote::*, codeblock::*};
 
 const MAJOR: i64 = 1;
 const MINOR: i64 = 1;
-const PATCH: i64 = 4;
+const PATCH: i64 = 16;
 
 struct Handler;
 
@@ -35,7 +35,7 @@ impl EventHandler for Handler {
         //lib::database::validate(&ready).await;
         //println!("Validated DB");
     }
-    /**
+    /*
     async fn guild_member_update(&self, ctx: Context, old_data: Option<Member>, new_data: Member) {
         match old_data {
             Some(member) => {
@@ -91,6 +91,7 @@ impl EventHandler for Handler {
     }
     */
 
+    /*
     async fn guild_member_addition(&self, ctx: Context, guild_id: GuildId, mut new_member: Member) {
         let _guild_name = match guild_id.name(&ctx).await {
             Some(p) => p,
@@ -126,6 +127,7 @@ impl EventHandler for Handler {
             }
         }
     }
+    */
 }
 
 #[group]
@@ -140,7 +142,7 @@ struct Owner;
 struct Staff;
 
 #[group]
-#[commands(ping, verify, support, search, lua, whois)]
+#[commands(ping, verify, support, search, lua, whois, codeblock)]
 struct General;
 
 #[help]
@@ -247,7 +249,7 @@ async fn main() {
         data.insert::<lib::util::ShardManagerContainer>(Arc::clone(&client.shard_manager));
     }
 
-    if let Err(why) = client.start_shards(4).await {
+    if let Err(why) = client.start().await {
         println!("Client error: {:?}", why);
     }
 }
