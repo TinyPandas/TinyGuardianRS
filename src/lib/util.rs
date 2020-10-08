@@ -1,6 +1,4 @@
-use bson::*;
 use std::{sync::Arc};
-use mongodb::{Collection, Database};
 use serenity::{
     client::bridge::gateway::ShardManager,
     framework::standard::{Args, CommandOptions, CheckResult, macros::{check}},
@@ -11,13 +9,10 @@ use serenity::{
         id::{
             GuildId
         }
-    },
-    futures::StreamExt
+    }
 };
 use serenity::prelude::*;
 use tokio::sync::Mutex;
-
-use crate::lib;
 
 pub struct ShardManagerContainer;
 
@@ -25,22 +20,21 @@ impl TypeMapKey for ShardManagerContainer {
     type Value = Arc<Mutex<ShardManager>>;
 }
 
-pub async fn is_staff(msg: &Message) -> bool {
+pub async fn is_staff(ctx: &Context, msg: &Message) -> bool {
     let guild_id = &msg.guild_id;
-    let settings_db: Database = lib::database::get_database("guild_settings");
-    let settings: Collection = settings_db.collection("guild_settings");
     let success = match guild_id {
         Some(id) => {
-            let query = doc! {"_id" : &id.to_string()};
-            let guild_settings = lib::database::get_document_from_collection(settings, query).await;
-            let staff_id = lib::database::get_value_for_key(&guild_settings, String::from("staff_id"), String::from("")).await;
-
             let member = match &msg.member {
                 Some(mem) => {
                     let mut pass = false;
                     for role in &mem.roles {
-                        if !pass {
-                            pass = role.as_u64().to_string().eq(&staff_id);
+                        let r = role.to_role_cached(&ctx.cache).await;
+                        match r {
+                            Some(actual_role) => {
+                                if actual_role.name.to_lowercase().eq("staff") {
+                                    pass = true;
+                                } else {}
+                            }, None => {}
                         }
                     }
                     pass
@@ -56,12 +50,12 @@ pub async fn is_staff(msg: &Message) -> bool {
 
 #[check]
 #[name="Staff"]
-async fn staff_check(_: &Context, msg: &Message, _: &mut Args, _: &CommandOptions) -> CheckResult {
-    CheckResult::from(is_staff(msg).await)
+async fn staff_check(ctx: &Context, msg: &Message, _: &mut Args, _: &CommandOptions) -> CheckResult {
+    CheckResult::from(is_staff(ctx, msg).await)
 }
 
 pub async fn get_user_id_from_query(ctx: &Context, guild_id: GuildId, query: &String) -> (u64, usize, String) {
-    let mut target_id: u64;
+    let target_id: u64;
 
     let guild = guild_id.to_guild_cached(&ctx).await.unwrap();
 

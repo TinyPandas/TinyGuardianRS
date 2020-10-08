@@ -41,7 +41,7 @@ async fn warn(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
             let infraction_count = infraction_col.estimated_document_count(None).await.unwrap_or(0) + 1;
 
             let infraction_record = doc! { "$set" : {"_id" : infraction_count, "type" : "warn", "reason" : reason, "moderator_id" : moderator.to_string(), "removed" : "false"} };
-            let res = infraction_col.update_one(doc! {"_id" : infraction_count}, infraction_record, UpdateOptions::builder().upsert(true).build()).await.unwrap();
+            let _res = infraction_col.update_one(doc! {"_id" : infraction_count}, infraction_record, UpdateOptions::builder().upsert(true).build()).await.unwrap();
 
             let user_name = UserId::from(user_id).to_user(&ctx.http).await.unwrap().name;
             
@@ -58,7 +58,7 @@ async fn warn(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
             } else {
                 match infraction_channel {
                     Ok(i_c) => {
-                        let f = i_c.id().send_message(&ctx.http, |f|{
+                        let _f = i_c.id().send_message(&ctx.http, |f|{
                             f.content(format!("Warned {} for {}. [Infractions: {}]", user_name, reason, infraction_count));
                             f
                         }).await;
@@ -99,7 +99,7 @@ async fn warn(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                         let update = doc! {"$set" : {"infraction_log_channel" : new_id.to_string()}};
                         let _ = settings_update.update_one(query, update, None).await;
 
-                        let f = channel.send_message(&ctx.http, |f|{
+                        let _f = channel.send_message(&ctx.http, |f|{
                             f.content(format!("Warned {} for {}. [Infractions: {}]", user_name, reason, infraction_count));
                             f
                         }).await;

@@ -12,7 +12,6 @@ use select::{
     predicate::{
         Predicate,
         Attr,
-        Class,
         Name
     }
 };
@@ -30,7 +29,7 @@ struct RobloxResult {
     errors: Value
 }
 
-async fn lua_pil(ctx: &Context, msg: &Message, query: &str) {
+async fn lua_pil(_ctx: &Context, _msg: &Message, query: &str) {
     println!("{}", query);
     let name = format!("pdf-{}", query);
     println!("ATTR: {}", name);

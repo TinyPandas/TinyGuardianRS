@@ -9,22 +9,24 @@ use serenity::{
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
 struct RobloxAccount {
     status: String,
-    robloxUsername: String,
-    robloxId: i32,
+    robloxusername: String,
+    robloxid: i32,
 }
 
 #[derive(Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 struct Permissions {
-    ADMIN: bool,
-    SUPER_ADMIN: bool,
-    BLOG_EDITOR: bool,
-    BLOG_AUTHOR: bool,
-    MODERATE: bool,
-    EDIT_GLOSSARY: bool,
-    COMMUNITY_MODERATOR: bool,
-    CHAT_ADMIN: bool,
+    admin: bool,
+    super_admin: bool,
+    blog_editor: bool,
+    blog_author: bool,
+    moderate: bool,
+    edit_glossary: bool,
+    community_moderator: bool,
+    chat_admin: bool,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -66,7 +68,7 @@ pub async fn get_roblox_name(discord_id: u64) -> String {
 
     let res = match roblox_acc {
         Some(r) => {
-            format!("{} [{}]", r.robloxUsername, r.robloxId)
+            format!("{} [{}]", r.robloxusername, r.robloxid)
         }, None => {
             String::from("No associated roblox account.")
         }
@@ -94,7 +96,7 @@ async fn get_roblox_account(discord_id: &str) -> Option<RobloxAccount> {
 }
 
 async fn get_sh_account(roblox_acc: RobloxAccount) -> Option<SHAccount> {
-    let res = match reqwest::get(format!("https://scriptinghelpers.org/resources/get_profile_by_roblox_id/{}", roblox_acc.robloxId).as_str()).await {
+    let res = match reqwest::get(format!("https://scriptinghelpers.org/resources/get_profile_by_roblox_id/{}", roblox_acc.robloxid).as_str()).await {
         Ok(r) => {
             match r.json::<SHAccount>().await {
                 Ok(s) => {
@@ -209,7 +211,7 @@ pub async fn update_member_roles(_ctx: &Context, discord_id: &str, guild: Partia
                     }).await;
         
                     println!("User {} has Moderation Voter role", sh_acc.roblox_username);
-                    if sh_acc.permissions.MODERATE {
+                    if sh_acc.permissions.moderate {
                         match guild.role_by_name("Moderation Voter") {
                             Some(role) => {
                                 if !member.roles.contains(&role.id) {

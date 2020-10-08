@@ -20,7 +20,6 @@ async fn execute(ctx: &Context, channel_id: ChannelId, src: String, author: Stri
         lua.set_hook(HookTriggers {every_line: true, ..Default::default()}, move |_lua_context, _debug| {
             let now = Instant::now();
             let dif = now.duration_since(start);
-            println!("{:?}", dif);
             let mut err = false;
 
             if dif.gt(&Duration::new(30, 0)) {

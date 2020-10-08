@@ -17,7 +17,7 @@ async fn whois(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let mut display_history = false;
     let mut display_notes = false;
     let mut user_query = String::from("");
-    let is_staff = is_staff(msg).await;
+    let is_staff = is_staff(ctx, msg).await;
 
     println!("{} staff status: {}", &msg.author.name, is_staff);
 

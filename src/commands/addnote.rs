@@ -36,7 +36,7 @@ async fn addnote(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult 
             let update_col = name_db.collection(guild.to_string().as_str());
             let query = doc! {"_id" : target_id.to_string()};
             let update = doc! {"$set" : {"notes" : notes}};
-            let res = update_col.update_one(query, update, UpdateOptions::builder().upsert(true).build()).await.unwrap();
+            let _res = update_col.update_one(query, update, UpdateOptions::builder().upsert(true).build()).await.unwrap();
 
             let _ = msg.channel_id.send_message(&ctx.http, |f|{ 
                 f.content("Successfully added note to user.");

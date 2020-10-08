@@ -10,7 +10,7 @@ use serenity::{
 
 #[command]
 async fn codeblock(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
-    let result = msg.channel_id.send_message(&ctx.http, |f| {
+    let _result = msg.channel_id.send_message(&ctx.http, |f| {
         if args.len() > 0 {
             f.embed(|m| {
                 m.title(format!("Codeblock for {}", msg.author.name));
